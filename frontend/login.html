@@ -4,29 +4,46 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    form { max-width: 300px; margin: auto; display: flex; flex-direction: column; gap: 10px; }
+    input, button { padding: 10px; font-size: 14px; }
+    .msg { margin-top: 15px; font-weight: bold; text-align: center; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
 </head>
 <body>
-  <h2>Login</h2>
+  <h2 style="text-align:center;">Login</h2>
+
   <form id="loginForm">
     <input type="email" id="email" placeholder="Email" required />
     <input type="password" id="password" placeholder="Password" required />
     <button type="submit">Login</button>
   </form>
 
-  <p>Don’t have an account? 
+  <p style="text-align:center;">
+    Don’t have an account? 
     <a href="registration.html">Register here</a>
   </p>
 
+  <div id="message" class="msg"></div>
+
   <script>
+    const API_BASE = "/api/auth";
+
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const msgDiv = document.getElementById("message");
+      msgDiv.textContent = "Logging in...";
+      msgDiv.className = "msg";
 
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
       try {
-        // ✅ Call backend on port 5000
-        const res = await fetch("http://localhost:5000/api/auth/login", {
+        const res = await fetch(`${API_BASE}/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
@@ -35,19 +52,24 @@
         const data = await res.json();
 
         if (res.ok) {
-          alert("✅ Login successful!");
-          // ✅ Redirect to dashboard (adjust path if needed)
-          localStorage.setItem("token", data.token); // ✅ Save token
-          window.location.href = "dashboard.html";  // ✅ Redirect
-        } 
-        else {
-          alert("❌ " + data.message);
+          msgDiv.textContent = data.msg || "Login successful ✅";
+          msgDiv.className = "msg success";
+
+          // ✅ Save token and redirect
+          localStorage.setItem("token", data.token);
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1000);
+        } else {
+          msgDiv.textContent = data.msg || "Invalid credentials ❌";
+          msgDiv.className = "msg error";
         }
       } catch (err) {
         console.error(err);
-        alert("Something went wrong. Try again!");
+        msgDiv.textContent = "Server error. Please try again later.";
+        msgDiv.className = "msg error";
       }
     });
   </script>
 </body>
-</html>
+</html

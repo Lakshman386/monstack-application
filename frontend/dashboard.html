@@ -1,34 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+    h2 { color: #2c3e50; }
+    #userInfo { margin-top: 15px; font-size: 16px; }
+    button { margin-top: 20px; padding: 10px 20px; font-size: 14px; cursor: pointer; }
+    .msg { margin-top: 20px; font-weight: bold; }
+    .error { color: red; }
+  </style>
 </head>
 <body>
-  <h2 id="welcomeMsg">Welcome to the Dashboard 🎉</h2>
+  <h2 id="welcomeMsg">Loading your dashboard...</h2>
   <p id="userInfo"></p>
 
   <!-- Logout Button -->
-  <button id="logoutBtn">Logout</button>
+  <button id="logoutBtn" style="display:none;">Logout</button>
+
+  <div id="message" class="msg"></div>
 
   <script>
+    const API_BASE = "/api/auth";
     const token = localStorage.getItem("token");
+
     if (!token) {
       window.location.href = "login.html";
     }
 
     // Fetch user info
     async function loadUser() {
-      const res = await fetch("http://localhost:5000/api/auth/me", {
-        method: "GET",
-        headers: { "x-auth-token": token }
-      });
+      try {
+        const res = await fetch(`${API_BASE}/me`, {
+          method: "GET",
+          headers: { "x-auth-token": token }
+        });
 
-      const data = await res.json();
-      if (data.name) {
-        document.getElementById("welcomeMsg").innerText = `Welcome, ${data.name} 🎉`;
-        document.getElementById("userInfo").innerText = `Email: ${data.email}`;
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById("welcomeMsg").innerText = `Welcome, ${data.name} 🎉`;
+          document.getElementById("userInfo").innerText = `Email: ${data.email}`;
+          document.getElementById("logoutBtn").style.display = "inline-block";
+        } else {
+          document.getElementById("message").textContent = data.msg || "Session expired. Please log in again.";
+          document.getElementById("message").className = "msg error";
+          setTimeout(() => {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+          }, 1500);
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("message").textContent = "Server error. Please try again later.";
+        document.getElementById("message").className = "msg error";
       }
     }
+
     loadUser();
 
     // Logout
@@ -39,3 +69,4 @@
   </script>
 </body>
 </html>
+

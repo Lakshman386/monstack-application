@@ -6,7 +6,7 @@ const auth = require("../middleware/auth");
 
 const router = express.Router();
 
-// ✅ Register
+// Register
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -26,7 +26,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ✅ Login
+// Login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -45,7 +45,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Get Logged-in User
+// Get Logged-in User
 router.get("/me", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user).select("-password");
