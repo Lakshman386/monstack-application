@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+</head>
+<body>
+  <h2 id="welcomeMsg">Welcome to the Dashboard 🎉</h2>
+  <p id="userInfo"></p>
+
+  <!-- Logout Button -->
+  <button id="logoutBtn">Logout</button>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    // Fetch user info
+    async function loadUser() {
+      const res = await fetch("http://localhost:5000/api/auth/me", {
+        method: "GET",
+        headers: { "x-auth-token": token }
+      });
+
+      const data = await res.json();
+      if (data.name) {
+        document.getElementById("welcomeMsg").innerText = `Welcome, ${data.name} 🎉`;
+        document.getElementById("userInfo").innerText = `Email: ${data.email}`;
+      }
+    }
+    loadUser();
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      window.location.href = "login.html";
+    });
+  </script>
+</body>
+</html>
